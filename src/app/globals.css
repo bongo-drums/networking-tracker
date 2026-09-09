@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens
+
+   Every colour, radius and shadow used in the app is declared once here and
+   mapped into Tailwind's theme below, so components reference semantic names
+   (bg-surface, text-muted, border-line) rather than raw palette values. Dark
+   mode then works by redefining these variables -- no component changes.
+   --------------------------------------------------------------------------- */
+:root {
+  --background: #f7f7f6;
+  --surface: #ffffff;
+  --surface-muted: #f2f2f0;
+  --foreground: #1a1a19;
+  --muted: #6b6b66;
+  --line: #e2e2de;
+
+  --accent: #1d4ed8;
+  --accent-foreground: #ffffff;
+  --accent-soft: #eff4ff;
+
+  --danger: #b42318;
+  --danger-soft: #fef3f2;
+  --success: #067647;
+  --success-soft: #ecfdf3;
+
+  --priority-high: #b42318;
+  --priority-high-soft: #fef3f2;
+  --priority-medium: #b54708;
+  --priority-medium-soft: #fffaeb;
+  --priority-low: #475467;
+  --priority-low-soft: #f2f4f7;
+
+  --ring: #93b4fd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #131314;
+    --surface: #1c1c1e;
+    --surface-muted: #242427;
+    --foreground: #ededec;
+    --muted: #a1a1a0;
+    --line: #333338;
+
+    --accent: #6d9bff;
+    --accent-foreground: #10203f;
+    --accent-soft: #1b2540;
+
+    --danger: #ff8a80;
+    --danger-soft: #2c1a19;
+    --success: #6ee7a8;
+    --success-soft: #14291f;
+
+    --priority-high: #ff8a80;
+    --priority-high-soft: #2c1a19;
+    --priority-medium: #fdb022;
+    --priority-medium-soft: #2b2011;
+    --priority-low: #b0b7c3;
+    --priority-low-soft: #26262a;
+
+    --ring: #3b5ea8;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+
+  --color-priority-high: var(--priority-high);
+  --color-priority-high-soft: var(--priority-high-soft);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-medium-soft: var(--priority-medium-soft);
+  --color-priority-low: var(--priority-low);
+  --color-priority-low-soft: var(--priority-low-soft);
+
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Respect the OS "reduce motion" setting rather than animating regardless. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
