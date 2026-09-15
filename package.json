@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:rls": "node scripts/rls-test.mjs",
+    "screenshots": "node scripts/capture-screenshots.mjs",
     "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "jsdom": "^30.0.1",
+    "playwright-core": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",

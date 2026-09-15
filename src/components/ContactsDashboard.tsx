@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   SORT_FIELDS,
   createContact,
@@ -81,9 +81,22 @@ export function ContactsDashboard({
     setOptions((previous) => ({ ...previous, [key]: value }));
   }
 
+  // The pending auto-hide timer for the success message. Each new message
+  // cancels the previous timer; otherwise an older message's timer could fire
+  // mid-way through a newer one and hide it almost immediately (add a contact,
+  // then edit one within four seconds, and "Updated" vanishes).
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+    };
+  }, []);
+
   function flash(message: string) {
+    if (flashTimer.current) clearTimeout(flashTimer.current);
     setSuccess(message);
-    setTimeout(() => setSuccess(null), 4000);
+    flashTimer.current = setTimeout(() => setSuccess(null), 4000);
   }
 
   async function handleCreate(draft: ContactDraft) {
