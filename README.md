@@ -39,7 +39,41 @@ A private networking tracker for the people you want to stay connected with at B
 
 ## Screenshots
 
-_(to be added)_
+All of these were taken from the live deployment by [`scripts/capture-screenshots.mjs`](scripts/capture-screenshots.mjs) (`npm run screenshots`), which uses Playwright to drive Microsoft Edge. Signing in was done by hand. The signed-in email address is blurred because these images are in a public repository.
+
+### Sign in and sign out
+
+<img src="docs/screenshots/01-sign-in.png" width="420" alt="Sign-in screen"> <img src="docs/screenshots/12-signed-out.png" width="420" alt="Back at the sign-in screen after signing out">
+
+### Invalid input fails safely
+
+If you submit with a blank name, the form rejects it with a clear message and sends no request. The database's CHECK constraint would reject it too.
+
+<img src="docs/screenshots/02-invalid-input-rejected.png" width="720" alt="Form showing 'Name is required.' under the name field">
+
+### Create, sort, and filter
+
+<img src="docs/screenshots/03-contact-created.png" width="720" alt="Success message after adding a contact">
+
+<img src="docs/screenshots/04-sorted-by-priority.png" width="420" alt="Contacts sorted by priority, high first"> <img src="docs/screenshots/05-filtered-high-priority.png" width="420" alt="List filtered to high priority">
+
+### Edit, refresh, and delete
+
+<img src="docs/screenshots/06-editing-contact.png" width="420" alt="Editing a contact's role"> <img src="docs/screenshots/07-contact-edited.png" width="420" alt="Success message after the edit">
+
+The edit is still there after a full browser refresh, because it is stored in Neon Postgres:
+
+<img src="docs/screenshots/08-after-browser-refresh.png" width="720" alt="Contact list after a page reload, still showing the edited role">
+
+<img src="docs/screenshots/09-delete-confirmation.png" width="420" alt="Delete confirmation dialog"> <img src="docs/screenshots/10-contact-deleted.png" width="420" alt="Success message after deleting">
+
+### Mobile layout
+
+<img src="docs/screenshots/11-mobile-layout.png" width="300" alt="Contact list as cards at phone width">
+
+### Two accounts
+
+The two-account privacy check is proven by an automated test rather than a screenshot. It signs in two separate users against the live database. It then confirms that user B cannot read, update, or delete user A's contact, and cannot create a contact owned by user A. All 13 checks pass. See [Integration test — two-user privacy](#integration-test--two-user-privacy) for the full output.
 
 ---
 
@@ -289,7 +323,7 @@ This is the assignment's two-account privacy test, automated. It creates two thr
 - A's contact is unchanged after all of the above.
 - An unauthenticated request is refused outright.
 
-It cleans up after itself, deleting the test contact and both test users. Passwords are random per run and never printed or written to disk.
+At the end it deletes the test contact. The two test accounts stay behind, because Neon Auth doesn't enable the self-service delete-user endpoint by default (the request returns 404). They have throwaway `@example.com` addresses and can be removed from the Neon Console. Passwords are random for each run and are never printed or written to disk.
 
 Output from a real run against the live database (user ids shortened):
 
@@ -365,7 +399,7 @@ Every push to `main` triggers an automatic redeploy.
 - **No email verification or password reset flow.** Neon Auth supports both; neither is wired up.
 - **Search is a substring match** on name and company via `ILIKE`. No fuzzy matching, and no index supporting it — a full-text index would be the fix at scale.
 - **Route protection is client-side.** The dashboard renders based on the session hook. This is not a security hole — RLS means an unauthenticated client sees no data regardless — but it does mean a brief loading state instead of a server-side redirect. Adding `src/proxy.ts` with server-side session checks would tighten it.
-- **The two-user test creates and deletes real accounts.** It cleans up after itself, but a failed run mid-way can leave test users behind, removable from the Neon Console.
+- **The two-user test leaves its test accounts behind.** It deletes its test contact, but Neon Auth's delete-user endpoint isn't enabled, so each run adds two `rls-test-*@example.com` users. They can be removed from the Neon Console. Enabling user deletion in Neon Auth would let the test clean them up itself.
 
 ### What I would do next
 
