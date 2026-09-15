@@ -2,7 +2,9 @@
 
 A private networking tracker for the people you want to stay connected with at Berkeley. Sign in, add the people you meet with their company, role, where you met, notes, and a priority, then sort and filter the list as it grows. Every contact belongs to exactly one account, and that ownership is enforced by Postgres Row Level Security rather than by application code — so a signed-in user cannot read or change another user's contacts even if they bypass the UI entirely and call the API directly.
 
-**Live app:** _(to be added after deployment)_
+**Live app:** https://networking-tracker-vert.vercel.app
+
+**Repository:** https://github.com/bongo-drums/networking-tracker
 
 ---
 
@@ -262,7 +264,13 @@ npm test
 - A client-supplied `id`, `user_id`, `created_at`, or `updated_at` is stripped from the payload.
 - Raw Postgres constraint violations are translated into readable messages.
 
-_(Output to be added)_
+```
+ RUN  v4.1.11
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Duration  1.14s
+```
 
 ### Integration test — two-user privacy
 
@@ -283,13 +291,55 @@ This is the assignment's two-account privacy test, automated. It creates two thr
 
 It cleans up after itself, deleting the test contact and both test users. Passwords are random per run and never printed or written to disk.
 
-_(Output to be added)_
+Output from a real run against the live database (user ids shortened):
+
+```
+Preconditions: both users are genuinely authenticated
+  PASS  A's token is accepted by the Data API
+  PASS  B's token is accepted by the Data API
+
+User A creates a contact
+  PASS  A can insert a contact
+  PASS  the new row is stamped with A's user_id by the database
+  PASS  A can read back their own contact
+
+User B tries to reach User A's contact
+  PASS  B's contact list is empty (SELECT policy)
+  PASS  B cannot read A's contact even when asking for it by id
+  PASS  B cannot update A's contact (UPDATE policy)
+  PASS  B cannot delete A's contact (DELETE policy)
+  PASS  B cannot create a contact owned by A (INSERT WITH CHECK / column grant)
+
+User A's contact is untouched
+  PASS  A's contact still exists
+  PASS  A's contact still has its original name
+
+An unauthenticated request is refused
+  PASS  a request with no bearer token cannot read contacts
+
+All 13 privacy checks passed.
+```
+
+The precondition stage exists because of a lesson learned while writing this test: an earlier version reported that B "could not" update A's contact when in reality B's token was malformed and *every* request was failing. A policy check only means something if the request was accepted and matched zero rows, so each check now requires exactly that, and the test aborts outright if either user cannot authenticate.
 
 ---
 
 ## Deployment
 
-_(to be completed)_
+The app is deployed on Vercel from this repository.
+
+1. **Push to GitHub.** Vercel deploys from the repo, so the repo is the source of truth.
+2. **Import the repository in Vercel** (Add New → Project → Import). Vercel auto-detects Next.js; no build settings need changing.
+3. **Set the environment variables** in the import screen (or Project → Settings → Environment Variables):
+   - `NEXT_PUBLIC_NEON_AUTH_URL`
+   - `NEXT_PUBLIC_NEON_DATA_API_URL`
+
+   `DATABASE_URL` is deliberately **not** set on Vercel. The deployed app never touches the Postgres connection string — only the local migration script uses it — so the deployment holds no database credentials at all. `NEXT_PUBLIC_` variables are inlined at build time, so changing them requires a redeploy.
+4. **Deploy.**
+5. **Add the deployed domain to Neon Auth's trusted origins** (Neon Console → Auth → Configuration). Neon Auth validates the `Origin` header on every auth request and refuses origins it does not trust, so sign-in fails on the production domain until this is done.
+6. **Verify in production:** open the live URL in a private window, create two accounts, and confirm each sees only its own contacts. The same check runs automatically via `ORIGIN=https://<your-domain> npm run test:rls`.
+
+Every push to `main` triggers an automatic redeploy.
 
 ---
 
